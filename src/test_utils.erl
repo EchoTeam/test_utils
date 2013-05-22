@@ -2,6 +2,7 @@
 
 -export([
     index_of/2,
+    format_unique_str/1,
     random_character/1,
     unique_string/0,
     unique_url_with_scheme/1
@@ -37,6 +38,13 @@ index_of(E, L) ->
         {Idx, _} -> Idx;
         false -> not_found
     end.
+
+format_unique_str(Format) ->
+  Fun = fun
+    ($*) -> test_utils:unique_string();
+    (C) -> C
+  end,
+  lists:flatten([Fun(C) || C <- Format]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Unit tests
@@ -79,4 +87,38 @@ index_of_test_() ->
             ?assertEqual(2, Result)
         end
     ].
+
+format_unique_str_test_() ->
+  [
+    fun() ->
+        Result = format_unique_str(""),
+        ?assertEqual("", Result)
+    end,
+    fun() ->
+        Str = test_utils:unique_string(),
+        Result = format_unique_str(Str),
+        ?assertEqual(Str, Result)
+    end,
+    fun() ->
+        Result = format_unique_str("*"),
+        ?assert(length(Result) > 0),
+        ?assertNotEqual("*", Result)
+    end,
+    fun() ->
+        Prefix = test_utils:unique_string(),
+        Suffix = test_utils:unique_string(),
+        Result = format_unique_str(Prefix ++ "*" ++ Suffix),
+        ?assert(lists:prefix(Prefix, Result)),
+        ?assert(lists:suffix(Suffix, Result))
+    end,
+    fun() ->
+        Prefix = test_utils:unique_string(),
+        Suffix = test_utils:unique_string(),
+        Infix  = test_utils:unique_string(),
+        FormatString = Prefix ++ "*" ++ Infix ++ "*" ++ Suffix,
+        Result = format_unique_str(FormatString),
+        ?assert(length(Result) > length(FormatString)),
+        ?assertEqual(0, string:chr(Result, $*))
+    end
+  ].
 
