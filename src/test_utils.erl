@@ -50,6 +50,7 @@ format_unique_str(Format) ->
 % Unit tests
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
 unique_string_test_() ->
@@ -122,3 +123,4 @@ format_unique_str_test_() ->
     end
   ].
 
+-endif.
