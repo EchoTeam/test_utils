@@ -1,3 +1,4 @@
+%%% vim: set ts=4 sts=4 sw=4 expandtab:
 -module(test_utils).
 
 -export([
@@ -5,7 +6,8 @@
     format_unique_str/1,
     random_character/1,
     unique_string/0,
-    unique_url_with_scheme/1
+    unique_url_with_scheme/1,
+    catch_error/1
 ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -45,6 +47,15 @@ format_unique_str(Format) ->
     (C) -> C
   end,
   lists:flatten([Fun(C) || C <- Format]).
+
+catch_error(Fun) ->
+    try
+        Fun(),
+        '$ok'
+    catch
+        Class:Reason ->
+            {Class, Reason}
+    end.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Unit tests
@@ -122,5 +133,18 @@ format_unique_str_test_() ->
         ?assertEqual(0, string:chr(Result, $*))
     end
   ].
+
+catch_error_test_() ->
+    [
+        fun() ->
+            ?assertEqual('$ok', catch_error(fun() -> ok end))
+        end,
+        fun() ->
+            ?assertEqual({throw, somethrow}, catch_error(fun() -> throw(somethrow) end))
+        end,
+        fun() ->
+            ?assertEqual({error, someerror}, catch_error(fun() -> erlang:error(someerror) end))
+        end
+    ].
 
 -endif.
